@@ -1,11 +1,11 @@
 package collision
 
 
-import collision.CollisionDetector
-import input.World
-import input.Drone
+import voloDrone.movement.collision.CollisionDetector
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import voloDrone.model.Drone
+import voloDrone.model.World
 
 class CollisionDetectorTest {
 

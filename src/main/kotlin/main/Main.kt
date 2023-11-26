@@ -1,49 +1,54 @@
-import input.InputParser
-import input.World
-import input.Drone
-import movement.MovementCalculator
-import collision.CollisionDetector
-import output.OutputGenerator
+import voloDrone.movement.collision.CollisionDetector
+import voloDrone.input.InputParser
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.consumeEach
+import voloDrone.model.ParsedSensorData
+import voloDrone.movement.MovementCalculator
+import voloDrone.output.OutputGenerator
 
 fun main() {
-    val input = """
-        ;WORLD
-        10 10 10
-        ;DRONE
-        5 5 5
-        ;COMMAND
-        01 LEFT 2
-        02 RIGHT 3
-        03 UP 4
-        04 DOWN 3
-        05 FORWARD 4
-        06 BACKWARD 3
-        07 FORWARD 4
-    """.trimIndent()
+    var parsedData : ParsedSensorData?= null
+    var totalDistanceFlown = 0
 
-    val (world, drone, commands) = InputParser.parseInput(input)
+    val parsedSensorChannel = InputParser.parsedSensorChannel
+
+    val sensorJob = GlobalScope.launch { SensorModule.readSensorData() }
+    val inputParserJob = GlobalScope.launch { InputParser.parseInput() }
+    val retrieveChannelDataJob = GlobalScope.launch {
+        parsedSensorChannel.consumeEach { parsedData ->
+            totalDistanceFlown =  processParsedData(parsedData,totalDistanceFlown)
+
+        }
+    }
+    runBlocking {
+        joinAll(sensorJob, inputParserJob,retrieveChannelDataJob)
+    }
+}
+fun processParsedData(parsedData: ParsedSensorData, totalDistanceFlown: Int): Int {
+    var totalDistance = totalDistanceFlown
+    val drone = parsedData.drone
+    val world = parsedData.world
+    val commands = parsedData.commands
     OutputGenerator.generateInitialLogs(world.width, world.depth, world.height, drone)
     OutputGenerator.generateTakeOffLog()
-
-    var totalDistanceFlown = 0
-    for (command in commands) {
+    for (command in commands){
         val movement = MovementCalculator.calculateMovement(command.direction, command.distance, drone)
         if (CollisionDetector.willCollide(world, drone, movement)) {
-            OutputGenerator.generateMovementLog(movement, drone, totalDistanceFlown, true)
+            OutputGenerator.generateMovementLog(movement, drone, totalDistance, true)
             val correctedMovement = CollisionDetector.resolveCollision(world, drone, movement)
             drone.x += correctedMovement.first
             drone.y += correctedMovement.second
             drone.z += correctedMovement.third
-            totalDistanceFlown += correctedMovement.first + correctedMovement.second + correctedMovement.third
-            OutputGenerator.generateMovementLog(correctedMovement, drone, totalDistanceFlown)
+            totalDistance += correctedMovement.first + correctedMovement.second + correctedMovement.third
+            OutputGenerator.generateMovementLog(correctedMovement, drone, totalDistance)
         } else {
             drone.x += movement.first
             drone.y += movement.second
             drone.z += movement.third
-            totalDistanceFlown += command.distance
-            OutputGenerator.generateMovementLog(Triple(movement.first, movement.second, movement.third), drone, totalDistanceFlown)
+            totalDistance += command.distance
+            OutputGenerator.generateMovementLog(Triple(movement.first, movement.second, movement.third), drone, totalDistance)
         }
     }
-
     OutputGenerator.generateLandingLog()
+    return totalDistance
 }

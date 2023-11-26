@@ -1,6 +1,6 @@
-package movement
+package voloDrone.movement
 
-import input.Drone
+import voloDrone.model.Drone
 
 object MovementCalculator {
     fun calculateMovement(direction: String, distance: Int, drone: Drone): Triple<Int, Int, Int> {

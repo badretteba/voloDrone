@@ -1,7 +1,7 @@
-package collision
+package voloDrone.movement.collision
 
-import input.World
-import input.Drone
+import voloDrone.model.Drone
+import voloDrone.model.World
 
 object CollisionDetector {
     fun willCollide(world: World, drone: Drone, movement: Triple<Int, Int, Int>): Boolean {

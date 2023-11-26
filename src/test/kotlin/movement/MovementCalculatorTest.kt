@@ -1,9 +1,9 @@
 package movement
 
-import input.Drone
-import movement.MovementCalculator
+import voloDrone.movement.MovementCalculator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import voloDrone.model.Drone
 
 class MovementCalculatorTest {
 
