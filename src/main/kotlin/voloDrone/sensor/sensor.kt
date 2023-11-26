@@ -9,7 +9,8 @@ object SensorModule {
         val delayMillis = 1000L
         var round = 0
         val simulatedData = mutableListOf<String>()
-        while (true){
+        var isActive = true
+        while (isActive){
             val data = buildString {
                 appendLine(";WORLD")
                 appendLine("10 10 10")

@@ -2,6 +2,7 @@ package output
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import voloDrone.model.Drone
+import voloDrone.model.Movement
 import voloDrone.output.OutputGenerator
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -16,7 +17,7 @@ class OutputGeneratorTest {
         val originalOut = System.out
         System.setOut(printStream)
         val drone = Drone(5, 5, 5)
-        val movement = Triple(1, -2, 3)
+        val movement = Movement(1, -2, 3)
         val totalDistanceFlown = 10
         OutputGenerator.generateMovementLog(movement, drone, totalDistanceFlown)
         // Get the captured output as a string
